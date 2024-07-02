@@ -64,7 +64,8 @@ def show_info(e: GenericEventArguments):
     script_name = e.args["row"]["script_name"]
     selected_script = [{"id": x[0], "device": x[1], "account": x[4], "word": x[7], "author": x[8], "types": x[10] if x[10] else "", "freq": x[11], "status": {}} for x in scripts[script_name]]
     for s in selected_script:
-        sql.cursor.execute(f"select status from running_status where device='{s['device']}';")
+        # sql.cursor.execute(f"select status from running_status where device='{s['device']}';")
+        sql.execute(f"select status from running_status where device='{s['device']}';")
         the_status = sql.cursor.fetchone()
         status = {"color": "blue-grey", "label": "未知"}
         if the_status:
