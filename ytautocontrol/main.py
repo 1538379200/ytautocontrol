@@ -7,7 +7,7 @@ from loguru import logger
 
 app.add_static_files("/statics", "./statics/")
 logger.add("./log/log_{time}.log", level="ERROR")
-ui.run(port=9527, title="YTAuto")
+ui.run(port=9527, title="YTAuto", reload=False)
 
 
 

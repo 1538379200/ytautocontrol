@@ -22,7 +22,7 @@ def base_grid(func):
             with ui.row().classes("flex w-full h-full items-center justify-center mx-4"):
                 # ui.label("YTAuto").classes("flex-1 font-bold text-white text-lg")
                 # ui.avatar("fa-youtube", size="50px").classes("text-white")
-                ui.button("YTAuto", on_click=lambda: ui.navigate.to("/")).props("flat").classes("flex-1 font-bold text-white text-lg bg-indigo-700 hover:bg-indigo-600/80")
+                ui.button("YTYOUNB", on_click=lambda: ui.navigate.to("/")).props("flat").classes("flex-1 font-bold text-white text-lg bg-indigo-700 hover:bg-indigo-600/80")
                 with ui.row().classes("flex-none"):
                     ui.button(icon="menu").props("flat").classes("text-white")
                     with ui.menu():

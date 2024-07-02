@@ -93,7 +93,6 @@ def account_page():
         ui.run_javascript("location.reload();")
 
 
-
     with ui.dialog().classes() as dialog, ui.card().classes("w-1/2 h-2/3 border-1"):
         with ui.card_section().classes("w-full bg-indigo-600"):
             ui.label("添加账号数据").classes("text-lg font-semibold w-full text-white")

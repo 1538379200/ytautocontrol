@@ -2,6 +2,7 @@ import socket
 from pathlib import Path
 from typing import TypedDict
 import toml
+import json
 
 
 config_file = Path(__file__).resolve().parents[1] / "config" / "socket.toml"
@@ -45,11 +46,18 @@ class SocketHandler:
         """
         self.client.send(message.encode())
         response = self.client.recv(1024)
-        try:
-            data = response.decode()
-        except:
-            data = response.decode("gbk")
-        return data
+        encodings = ['utf-8', 'gbk', 'gb2312', 'big5', 'latin1']
+        for encoding in encodings:
+            try:
+                return response.decode(encoding)
+            except:
+                continue
+        raise RuntimeError("转码失败")
+        # try:
+        #     data = response.decode()
+        # except:
+        #     data = response.decode("gbk")
+        # return data
 
     def run_script(self, script: RunScriptFields) -> str:
         """
@@ -73,6 +81,17 @@ class SocketHandler:
         # run_script = f'''poetry run pytest --account="{account}" --password="{password}" --word="{word}" --author="{author}" --email="{email}" --addr="{addr}" --filter-types="{filter_types}" --freq={freq} --script-name="{script_name}"'''
         run_fields = f'''"{account}" "{password}" "{email}" "{word}" "{author}" "{addr}" "{filter_types}" {freq} "{script_name}"'''
         return self.send(f"run {run_fields}")
+
+    def get_logs(self) -> list:
+        result = self.send("logs")
+        return json.loads(result)
+
+    def get_log_content(self, name: str):
+        # result = self.send(f"log_content {name}")
+        # return json.loads(result)
+        self.client.send(f"log_content {name}".encode())
+        result = self.client.recv(9999)
+        return result.decode().split("\n")
 
     def close(self):
         self.client.close()
