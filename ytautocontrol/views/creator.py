@@ -204,23 +204,43 @@ def runner_table():
 
 
 @ui.page("/")
-@base_grid
 def home_page():
     global global_word, global_author, devices, accounts, device_options, account_options
-    devices = [{"id": x[0], "ip": x[1], "account": x[2], "password": x[3]} for x in sql.get_all_devices_info()]
-    accounts = [{"id": x[0], "account": x[1], "password": x[2], "email": x[3]} for x in sql.get_all_accounts()]
-    devices_selected = []
-    device_options = list(set([x["ip"] for x in devices]).difference([x["device"] for x in devices_selected]))
-    account_options = list(set([x["account"] for x in accounts]).difference(x["account"] for x in devices_selected))
-    with ui.card().classes("w-full"):
-        with ui.card_section():
-            ui.label("全局数据").classes("text-lg font-semibold")
-            ui.label("当你未设置搜索关键词和视频作者时，将使用全局数据填入，利用此方法，避免重复数据填写").classes("text-md")
-        with ui.card_section().classes("w-full"):
-            with ui.row().classes("flex justify-center").classes("w-full"):
-                ui.input("全局搜索词").bind_value(globals(), "global_word")
-                ui.input("全局作者名").bind_value(globals(), "global_author")
-                ui.input("全局过滤项").bind_value(globals(), "global_types")
-    save_dialog()
-    insert_dialog()
-    runner_table()
+    with ui.row().classes("fixed top-0 left-0 right-0 bg-indigo-600 w-full h-14 z-10"):
+        with ui.row().classes("flex w-full h-full items-center justify-center mx-4"):
+            ui.button("YTYOUNB", on_click=lambda: ui.navigate.to("/")).props("flat").classes("flex-1 font-bold text-white text-lg bg-indigo-700 hover:bg-indigo-600/80")
+            with ui.row().classes("flex-none"):
+                ui.button(icon="menu").props("flat").classes("text-white")
+                with ui.menu():
+                    # __menu_component()
+                    ui.menu_item("示例菜单功能", on_click=lambda: ui.notify("这是留给后续使用的菜单接口"))
+    with ui.column().classes("my-20 fixed left-0 ml-4 w-1/4 h-2/4"):
+        with ui.card().classes("w-1/2 h-full"):
+            ui.label("页面导航").classes("text-lg font-semibold")
+            ui.separator()
+            # __base_sidebar()
+            ui.tree([
+                {"id": "/", "label": "创建执行"},
+                {"id": "/accounts", "label": "账号管理"},
+                {"id": "/devices", "label": "设备管理"},
+                {"id": "/runner", "label": "执行管理"},
+            ], label_key="label", on_select=lambda e: ui.navigate.to(e.value)).classes("w-full flex flex-col space-y-2")
+    with ui.row().classes("w-full h-full"):
+        with ui.column().classes("mt-20 mx-80 h-full w-full"):
+            devices = [{"id": x[0], "ip": x[1], "account": x[2], "password": x[3]} for x in sql.get_all_devices_info()]
+            accounts = [{"id": x[0], "account": x[1], "password": x[2], "email": x[3]} for x in sql.get_all_accounts()]
+            devices_selected = []
+            device_options = list(set([x["ip"] for x in devices]).difference([x["device"] for x in devices_selected]))
+            account_options = list(set([x["account"] for x in accounts]).difference(x["account"] for x in devices_selected))
+            with ui.card().classes("w-full"):
+                with ui.card_section():
+                    ui.label("全局数据").classes("text-lg font-semibold")
+                    ui.label("当你未设置搜索关键词和视频作者时，将使用全局数据填入，利用此方法，避免重复数据填写").classes("text-md")
+                with ui.card_section().classes("w-full"):
+                    with ui.row().classes("flex justify-center").classes("w-full"):
+                        ui.input("全局搜索词").bind_value(globals(), "global_word")
+                        ui.input("全局作者名").bind_value(globals(), "global_author")
+                        ui.input("全局过滤项").bind_value(globals(), "global_types")
+            save_dialog()
+            insert_dialog()
+            runner_table()

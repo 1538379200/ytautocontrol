@@ -1,8 +1,10 @@
+from threading import ExceptHookArgs
 import psycopg2
 import toml
 from pathlib import Path
 from contextlib import suppress
 from typing import Any, Literal, TypedDict
+from loguru import logger
 
 
 class RunnerScripts(TypedDict):
@@ -30,6 +32,7 @@ class Sql:
             password=self.config["ytauto"]["password"],
             dbname=self.config["ytauto"]["dbname"]
         )
+        self.conn.autocommit = True
         self.cursor = self.conn.cursor()
     
     def get_all_accounts(self):
@@ -39,6 +42,7 @@ class Sql:
 
     def __check_connected(self):
         if self.conn.closed:
+            logger.error(f"数据库连接关闭，尝试重新连接……")
             self.conn = psycopg2.connect(
                 host=self.config["ytauto"]["host"],
                 port=self.config["ytauto"]["port"],
@@ -47,6 +51,23 @@ class Sql:
                 dbname=self.config["ytauto"]["dbname"]
             )
         if self.cursor.closed:
+            logger.error("数据库游标已关闭，尝试重新连接……")
+            self.cursor = self.conn.cursor()
+        try:
+            self.cursor.execute("select 1")
+        except (psycopg2.OperationalError, psycopg2.InterfaceError):
+            logger.error(f"数据库连接失败，正在尝试重新连接……")
+            with suppress(Exception):
+                self.cursor.close()
+                self.conn.close()
+            self.conn = psycopg2.connect(
+                host=self.config["ytauto"]["host"],
+                port=self.config["ytauto"]["port"],
+                user=self.config["ytauto"]["user"],
+                password=self.config["ytauto"]["password"],
+                dbname=self.config["ytauto"]["dbname"]
+            )
+            self.conn.autocommit = True
             self.cursor = self.conn.cursor()
 
     def execute(self, sql: str, fetch: Literal["all", "one", None] = None) -> Any:
@@ -167,6 +188,12 @@ class Sql:
         except Exception:
             self.conn.commit()
             return False
+
+    def get_scripts_names(self) -> list[str]:
+        self.__check_connected()
+        self.cursor.execute(f"select distinct name from runner_scripts;")
+        names = [x[0] for x in self.cursor.fetchall()]
+        return names
 
     def get_scripts_and_group(self) -> dict[str, RunnerScripts]:
         """获取脚本数据并进行格式化映射操作"""
